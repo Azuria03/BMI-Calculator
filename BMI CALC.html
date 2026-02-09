@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .bmi-value {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .bmi-category {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .bmi-description {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .underweight {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .normal {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .overweight {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .obese {
+            background: #ffebee;
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BMI Calculator</h1>
+        
+        <div class="input-group">
+            <label for="age">Age (years)</label>
+            <input type="number" id="age" placeholder="Enter your age" min="2" max="120">
+        </div>
+
+        <div class="input-group">
+            <label>Height</label>
+            <div style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <input type="number" id="feet" placeholder="Feet" min="0" max="8">
+                </div>
+                <div style="flex: 1;">
+                    <input type="number" id="inches" placeholder="Inches" min="0" max="11" step="0.1">
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="weight">Weight (kg)</label>
+            <input type="number" id="weight" placeholder="Enter your weight in kg" step="0.1" min="0">
+        </div>
+
+        <button onclick="calculateBMI()">Calculate BMI</button>
+
+        <div class="result" id="result">
+            <div class="bmi-value" id="bmiValue"></div>
+            <div class="bmi-category" id="bmiCategory"></div>
+            <div class="bmi-description" id="bmiDescription"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateBMI() {
+            const age = parseFloat(document.getElementById('age').value);
+            const feet = parseFloat(document.getElementById('feet').value) || 0;
+            const inches = parseFloat(document.getElementById('inches').value) || 0;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const result = document.getElementById('result');
+
+            if (!age || (!feet && !inches) || !weight || age <= 0 || weight <= 0) {
+                alert('Please enter valid age, height and weight values');
+                return;
+            }
+
+            // Convert feet and inches to total inches, then to meters
+            const totalInches = (feet * 12) + inches;
+            const heightInMeters = totalInches * 0.0254; // 1 inch = 0.0254 meters
+
+            // Calculate BMI
+            const bmi = weight / (heightInMeters * heightInMeters);
+            const bmiRounded = bmi.toFixed(1);
+
+            // Determine category based on age
+            let category, categoryClass, description;
+
+            // Different BMI categories for children/teens vs adults
+            if (age < 18) {
+                // For children and teens, BMI interpretation is more complex
+                // This is a simplified version - real pediatric BMI uses percentiles
+                if (bmi < 16) {
+                    category = 'Underweight';
+                    categoryClass = 'underweight';
+                    description = 'For children and teens, consult a pediatrician for accurate assessment.';
+                } else if (bmi >= 16 && bmi < 23) {
+                    category = 'Normal Weight';
+                    categoryClass = 'normal';
+                    description = 'Appears healthy, but consult a pediatrician for proper growth assessment.';
+                } else if (bmi >= 23 && bmi < 27) {
+                    category = 'Overweight';
+                    categoryClass = 'overweight';
+                    description = 'Consult a pediatrician for proper evaluation and guidance.';
+                } else {
+                    category = 'Obese';
+                    categoryClass = 'obese';
+                    description = 'Please consult a pediatrician for proper evaluation and guidance.';
+                }
+            } else if (age >= 18 && age < 65) {
+                // Standard adult BMI categories
+                if (bmi < 18.5) {
+                    category = 'Underweight';
+                    categoryClass = 'underweight';
+                    description = 'You may need to gain weight. Consult a healthcare provider.';
+                } else if (bmi >= 18.5 && bmi < 25) {
+                    category = 'Normal Weight';
+                    categoryClass = 'normal';
+                    description = 'You have a healthy weight. Keep it up!';
+                } else if (bmi >= 25 && bmi < 30) {
+                    category = 'Overweight';
+                    categoryClass = 'overweight';
+                    description = 'You may need to lose some weight. Consider diet and exercise.';
+                } else {
+                    category = 'Obese';
+                    categoryClass = 'obese';
+                    description = 'You should consult a healthcare provider for guidance.';
+                }
+            } else {
+                // Older adults (65+) - slightly higher BMI can be healthier
+                if (bmi < 23) {
+                    category = 'Underweight';
+                    categoryClass = 'underweight';
+                    description = 'For older adults, slightly higher BMI may be beneficial. Consult your doctor.';
+                } else if (bmi >= 23 && bmi < 28) {
+                    category = 'Normal Weight';
+                    categoryClass = 'normal';
+                    description = 'You have a healthy weight for your age group.';
+                } else if (bmi >= 28 && bmi < 33) {
+                    category = 'Overweight';
+                    categoryClass = 'overweight';
+                    description = 'Consult a healthcare provider for personalized guidance.';
+                } else {
+                    category = 'Obese';
+                    categoryClass = 'obese';
+                    description = 'You should consult a healthcare provider for guidance.';
+                }
+            }
+
+            // Display result
+            document.getElementById('bmiValue').textContent = bmiRounded;
+            document.getElementById('bmiCategory').textContent = category;
+            document.getElementById('bmiDescription').textContent = description;
+
+            result.className = 'result show ' + categoryClass;
+        }
+
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                calculateBMI();
+            }
+        });
+    </script>
+</body>
+</html>
